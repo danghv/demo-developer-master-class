@@ -1,28 +1,47 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import { fetchMovieDetails, fetchMovies } from './api-funcs'
+import MovieDetail from './Components/MovieDetail'
+import MoviesList from './Components/MoviesList'
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+	state = {
+		isShow: true,
+		movieData: [],
+		loading: false
+	}
+	async componentDidMount() {
+		await fetchMovies().then(res => {
+			console.log(res)
+			this.setState({ movies: res })
+		})
+	}
+	render() {
+		return (
+			<div className="App">
+				<MoviesList
+					show={this.state.isShow}
+					handleClick={async (e, id) => {
+						console.log('start fetching...')
+						this.setState({loading: true})
+						await fetchMovieDetails(id).then(res => {
+							console.log('res...', res)
+							this.setState({isShow: false, movieData: res})
+						})
+						console.log('stop fetching...')
+						this.setState({loading: false})
+				}}
+					loading={this.state.loading}
+				/>
+				<MovieDetail
+					show={!this.state.isShow}
+					movieData={this.state.movieData}
+					handleClickBack={() => {
+						console.log('clicked')
+						this.setState({isShow: true})
+					}}/>
+			</div>
+		)
+	}
 }
+export default App
 
-export default App;
